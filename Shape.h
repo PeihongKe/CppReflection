@@ -4,7 +4,7 @@
 
 
 
-class Shape: public ISerializable
+class Shape
 {
 public: 
 
@@ -13,7 +13,7 @@ public:
 
 	}
 
-	Shape(int type) : m_type(type)
+	Shape(int type, double area) : m_type(type), m_area(area)
 	{
 
 	}
@@ -22,18 +22,13 @@ public:
 
 	static void load()
 	{
-		//MetaDataManager::singleton().addFields(TOSTRING(Shape), TOSTRING(m_type), TOSTRING(int));
-		RegisterVariable(Shape, m_type, int);
+		RegisterVariable(Shape, m_type, int);		
+		RegisterVariable(Shape, m_area, double);
 	}
-	//virtual ~Shape() {};
+	virtual ~Shape() {};
 private:
 	int m_type;
+	double m_area;
 
 };
-
-class Circle: public Shape
-{
-public:
-};
-
-
+ 

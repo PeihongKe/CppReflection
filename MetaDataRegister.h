@@ -10,123 +10,217 @@
 #define TOSTRING(x) STRINGIFY(x)
 
 
-
-struct Field
-{
-	std::string field;
-	std::string type;
-};
-
-class MetaRegister
+class MetaField
 {
 public:
-	typedef void(*func)();
+
+	MetaField(const std::string& n, std::size_t ofst, const std::string& typeName ): m_field_name(n), m_offset(ofst), m_typename(typeName) {}
+
+	std::string name() const { return m_field_name; }	
+	std::size_t offset() const { return m_offset;  }
+	std::string typeName() const { return m_typename; }
+
+private:
+	std::string m_field_name;	
+	std::size_t m_offset;
+	std::string m_typename;
+
+};
 
 
-	MetaRegister()
+template<typename T>
+class MetaData
+{
+public:
+
+	void AddField(const MetaField& field)
 	{
+		fields.push_back(field.name());
+		offsetByName[field.name()] = field.offset();
+		typeNameByFiledName[field.name()] = field.typeName();
 	}
 
-	void addLoader(func f)
+	static MetaData& Get()
 	{
-		loaders.push_back(f);
+		static MetaData meta ;
+		return meta;
 	}
 
-	void addSuperClass(const std::string& sup, const std::string& sub)
+	size_t Offset(const std::string& fieldName) const
 	{
-		superClassBySubClass.insert( { sup, sub } );
+		// return offsetByName[ fieldName ];
+		return offsetByName.at( fieldName );
+		//return 1;
 	}
 
-	void addFields(const std::string& className, const std::string& fieldName, const std::string& fieldType)
+	std::string TypeName(const std::string& fieldName) const
 	{
-		auto field = Field();
-		field.field = fieldName;
-		field.type = fieldType;
-
-		if (fieldsByClass.find(className) == fieldsByClass.end() )
-		{
-			fieldsByClass[className];
-		}
-
-		fieldsByClass[className].push_back(field);
+		return typeNameByFiledName.at(fieldName);
+	
 	}
+
+	std::vector<std::string> Fields() const
+	{
+		return fields;
+	}
+
+private:
+	std::vector<std::string> fields;
+	std::map<std::string, size_t> offsetByName; 
+	std::map<std::string, std::string> typeNameByFiledName;
+
+};
+
+
+class MetaManager
+{
+public:
+	typedef void(*metaLoaderFunc)();
 
 	void loadMetaData()
 	{
-		for(auto f : loaders)
-		{ 
+		for (auto f : loaders)
+		{
 			f();
 		}
 	}
 
-	template<typename type>
-	std::string serialize(const type& obj)
+	void addLoader(metaLoaderFunc f)
 	{
-		std::stringstream ss;
-		auto typeName = typeid(type).name();
-		auto fields = fieldsByClass[typeName];
-		//ss << obj.m_version;
-		for (auto f : fields)
-		{
-			auto fieldName = f.field;
-			auto typeName = f.type;
-			ss << std::to_string(obj.m_type);
-		}
-
-		return ss.str();
+		loaders.push_back(f);
 	}
 
-
-	template<typename type>
-	type deserialize(const std::string& serializedObj, type a = type())
+	static MetaManager& Get()
 	{
-		type obj;
-		obj.m_version = std::stoi(serializedObj);
-		return obj;
-
-		
+		static MetaManager manager;
+		return manager;
 	}
-	
 
 private:
+	std::vector<metaLoaderFunc> loaders;
 
-	std::vector<func> loaders;
-	std::vector<std::string> classNames;
-	std::map<std::string, std::vector<Field>>  fieldsByClass;
-	std::map<std::string, std::string > superClassBySubClass;
-	
 
-} ;
+};
+//
+//class MetaRegister
+//{
+//public:
+//	typedef void(*func)();
+//
+//
+//	MetaRegister()
+//	{
+//	}
+//
+//	void addLoader(func f)
+//	{
+//		loaders.push_back(f);
+//	}
+//
+//	void addSuperClass(const std::string& sup, const std::string& sub)
+//	{
+//		superClassBySubClass.insert( { sup, sub } );
+//	}
+//
+//	void addFields(const std::string& fieldName, std::size_t fieldOffset)
+//	{
+//		auto meta = MetaField(fieldName, fieldOffset);
+// 
+//
+//		//if (fieldsByClass.find(className) == fieldsByClass.end() )
+//		//{
+//		//	fieldsByClass[className];
+//		//}
+//
+//		//fieldsByClass[className].push_back(field);
+//	}
+//
+//	void loadMetaData()
+//	{
+//		for(auto f : loaders)
+//		{ 
+//			f();
+//		}
+//	}
+//
+//	template<typename type>
+//	std::string serialize(const type& obj)
+//	{
+//		std::stringstream ss;
+//		auto typeName = typeid(type).name();
+//		auto fields = fieldsByClass[typeName];
+//		//ss << obj.m_version;
+//		for (auto f : fields)
+//		{
+//			auto fieldName = f.field;
+//			auto typeName = f.type;
+//			ss << std::to_string(obj.m_type);
+//		}
+//
+//		return ss.str();
+//	}
+//
+//
+//	template<typename type>
+//	type deserialize(const std::string& serializedObj, type a = type())
+//	{
+//		type obj;
+//		obj.m_version = std::stoi(serializedObj);
+//		return obj;
+//
+//		
+//	}
+//	
+//
+//private:
+//
+//	std::vector<func> loaders;
+//	std::vector<std::string> classNames;
+//	std::map<std::string, std::vector<MetaField>>  fieldsByClass;
+//	std::map<std::string, std::string > superClassBySubClass;
+//	
+//
+//} ;
 
-MetaRegister& getMeta()
+
+
+//class MetaDataManager {
+//public:
+//	static MetaRegister& Get() {
+//		static MetaRegister instance;
+//		return instance;
+//	}
+//};
+//
+//template<typename T>
+//class TypeClass
+//{
+//public:
+//	typedef T Type;
+//	T* get() // return a pointer to be turned into type
+//	{
+//		static TypeClass c;
+//		return &c;
+//	}
+//};
+//
+//void type()
+//{
+//	TypeClass<int>()
+//}
+//
+//
+
+
+
+template<typename T>
+T* NullCast(void)
 {
-	static MetaRegister meta;
-	return meta;
+	return reinterpret_cast<T *>(NULL);
 }
 
-class MetaDataManager {
-public:
-	static MetaRegister& singleton() {
-		static MetaRegister instance;
-		return instance;
-	}
-};
-
- 
-class ISerializable
-{
-public:
-	ISerializable(int version = 1): m_version(version){}
-
-	friend class MetaRegister;
-	virtual ~ISerializable() {}
-private:
-	int m_version;
-	
-};
-
-#define RegisterClass(className) MetaDataManager::singleton().addLoader((className##::load))									   
-#define RegisterSuperClass (superClass, subClass) MetaDataManager::singleton().addSuperClass( typeid(superClass).name() ), typeid(subClass).name() )							
-#define RegisterVariable(clazz, field, type) MetaDataManager::singleton().addFields( typeid(clazz).name(), TOSTRING(field), typeid(type).name() )
+#define RegisterClass(className) MetaManager::Get().addLoader((className##::load))									   
+//#define RegisterSuperClass (superClass, subClass) MetaDataManager::Get().addSuperClass( typeid(superClass).name() ), typeid(subClass).name() )							
+#define RegisterVariable(clazz, field, type) MetaData<Shape>::Get().AddField( MetaField( TOSTRING(field), (unsigned)(&(NullCast<clazz>()->##field)), TOSTRING(type) ))
 
 //#define RegisterSuperClass(className) MetaDataManager->addLoader(&className##::load)

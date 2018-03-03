@@ -14,7 +14,7 @@ class MetaField
 {
 public:
 
-	MetaField(const std::string& n, std::size_t ofst, const std::string& typeName ): m_field_name(n), m_offset(ofst), m_typename(typeName) {}
+	MetaField(const std::string& fieldName, std::size_t ofst, const std::string& typeName ): m_field_name(fieldName), m_offset(ofst), m_typename(typeName) {}
 
 	std::string name() const { return m_field_name; }	
 	std::size_t offset() const { return m_offset;  }
@@ -27,6 +27,19 @@ private:
 
 };
 
+class VectorMetaField : public MetaField
+{
+public:
+	VectorMetaField(const std::string& fieldName, std::size_t ofst, const std::string& elementTypeName) : MetaField(fieldName, ofst, "vector"), m_elem_type(elementTypeName)
+	{}
+
+	std::string elemType() const { return m_elem_type; }
+	//std::size_t size() const { return m_vector_size; }
+
+private:
+	std::string m_elem_type;
+	//std::size_t m_vector_size;
+};
 
 template<typename T>
 class MetaData
@@ -221,6 +234,7 @@ T* NullCast(void)
 
 #define RegisterClass(className) MetaManager::Get().addLoader((className##::load))									   
 //#define RegisterSuperClass (superClass, subClass) MetaDataManager::Get().addSuperClass( typeid(superClass).name() ), typeid(subClass).name() )							
-#define RegisterVariable(clazz, field, type) MetaData<Shape>::Get().AddField( MetaField( TOSTRING(field), (unsigned)(&(NullCast<clazz>()->##field)), TOSTRING(type) ))
+#define RegisterVariable(clazz, field, type) MetaData<clazz>::Get().AddField( MetaField( TOSTRING(field), (unsigned)(&(NullCast<clazz>()->##field)), TOSTRING(type) ))
+#define RegisterVector(clazz, field, elemType) MetaData<clazz>::Get().AddField( VectorMetaField( TOSTRING(field), (unsigned)(&(NullCast<clazz>()->##field)), TOSTRING(elemType) ))
 
 //#define RegisterSuperClass(className) MetaDataManager->addLoader(&className##::load)

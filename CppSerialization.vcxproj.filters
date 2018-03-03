@@ -33,6 +33,12 @@
     <ClInclude Include="Printer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Curves.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CurveSerializer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">

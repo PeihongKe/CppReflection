@@ -8,6 +8,11 @@
 #include <iostream>
 #include "Printer.h"
 #include <sstream>
+#include "Curves.h"
+#include <memory>
+#include "CurveSerializer.h"
+
+#include <typeinfo>
 
 #define PTR_ADD( PTR, OFFSET ) \
   ((void *)(((char *)(PTR)) + (OFFSET)))
@@ -155,25 +160,41 @@ std::string serialize(T obj)
 
 
 
+
 int main()
 {
-	// 1. register 
-	RegisterClass(Shape);
+	BH::Curve::Sptr usdDisc = std::make_shared<BH::Curve>("USD.D");
+	BH::Curve::Sptr jpyProj = std::make_shared<BH::Curve>("JPY.STD");
+	BH::Curve::Sptr usdProj = std::make_shared<BH::Curve>("USD.STD");
+	BH::Curve::Sptr jpyXccy = std::make_shared<BH::Curve>("JPY.XCcy", usdDisc, usdDisc);
 
-	// 2. load
-	MetaManager::Get().loadMetaData();
+ 
+	/*std::cout << typeid(&jpyXccy).name() <<std::endl;
+	std::cout << typeid(&*jpyXccy).name() << std::endl;
+	std::cout << typeid(static_cast<void*>(&*jpyXccy)).name() << std::endl;*/
+	//std::string aString = "abc";
+	//std::cout << BH::SerializerFactory::getSerializer("string")->Print("aString", &aString);
+	//std::cout<<BH::SerializerFactory::getSerializer("Curve")->Print("usdDisc", &usdDisc);
+	std::cout << BH::SerializerFactory::getSerializer("Curve")->Print("jpyXccy", &jpyXccy);
 
 
-	auto& metaManger = MetaManager::Get();
+	//// 1. register 
+	//RegisterClass(Shape);
 
-	auto& shapeMeta = MetaData<Shape>::Get();
+	//// 2. load
+	//MetaManager::Get().loadMetaData();
 
-	Shape a(2, 5.1);
-	auto res = serialize(a);
-	auto b = 1;
-	//SampleBase aa;
-	
-	//SampleBase cc(aa);
+
+	//auto& metaManger = MetaManager::Get();
+
+	//auto& shapeMeta = MetaData<Shape>::Get();
+
+	//Shape a(2, 5.1);
+	//auto res = serialize(a);
+	//auto b = 1;
+	////SampleBase aa;
+	//
+	////SampleBase cc(aa);
 
 
 	//std::cout << &((unsigned)(&(reinterpret_cast<SampleBase *>(NULL)->a))) << std::endl;

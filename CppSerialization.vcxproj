@@ -145,6 +145,8 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Curves.h" />
+    <ClInclude Include="CurveSerializer.h" />
     <ClInclude Include="MetaDataRegister.h" />
     <ClInclude Include="Printer.h" />
     <ClInclude Include="Shape.h" />
